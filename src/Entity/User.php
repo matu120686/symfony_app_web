@@ -2,87 +2,41 @@
 
 namespace App\Entity;
 
+use App\Repository\UserRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
-/**
- * User
- *
- * @ORM\Table(name="user")
- * @ORM\Entity
- */
-class User
+#[ORM\Entity(repositoryClass: UserRepository::class)]
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="idUser", type="integer", nullable=false)
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     */
-    private $iduser;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    #[ORM\Column(length: 180, unique: true)]
+    private ?string $email = null;
+
+    #[ORM\Column]
+    private array $roles = [];
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="name", type="string", length=120, nullable=false)
+     * @var string The hashed password
      */
-    private $name;
+    #[ORM\Column]
+    private ?string $password = null;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="lastname", type="string", length=120, nullable=false)
-     */
-    private $lastname;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $photo = null;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="email", type="string", length=120, nullable=false)
-     */
-    private $email;
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $description = null;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="password", type="string", length=120, nullable=false)
-     */
-    private $password;
-
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="status", type="integer", nullable=false, options={"default"="1"})
-     */
-    private $status = 1;
-
-    public function getIduser(): ?int
+    public function getId(): ?int
     {
-        return $this->iduser;
-    }
-
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
-
-    public function setName(string $name): self
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    public function getLastname(): ?string
-    {
-        return $this->lastname;
-    }
-
-    public function setLastname(string $lastname): self
-    {
-        $this->lastname = $lastname;
-
-        return $this;
+        return $this->id;
     }
 
     public function getEmail(): ?string
@@ -97,7 +51,39 @@ class User
         return $this;
     }
 
-    public function getPassword(): ?string
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
+
+        return $this;
+    }
+
+    /**
+     * @see PasswordAuthenticatedUserInterface
+     */
+    public function getPassword(): string
     {
         return $this->password;
     }
@@ -109,17 +95,36 @@ class User
         return $this;
     }
 
-    public function getStatus(): ?int
+    /**
+     * @see UserInterface
+     */
+    public function eraseCredentials()
     {
-        return $this->status;
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
     }
 
-    public function setStatus(int $status): self
+    public function getPhoto(): ?string
     {
-        $this->status = $status;
+        return $this->photo;
+    }
+
+    public function setPhoto(?string $photo): self
+    {
+        $this->photo = $photo;
 
         return $this;
     }
 
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
 
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
+
+        return $this;
+    }
 }
